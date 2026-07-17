@@ -6,9 +6,9 @@ from pathlib import Path
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.responses import FileResponse
 
-from .analysis import find_value_bets, predict_all, predict_match
+from .analysis import build_legs, find_value_bets, predict_all, predict_match
 from .config import settings
-from .models import Event, MatchPrediction, ValueBet
+from .models import Event, Leg, MatchPrediction, ValueBet
 from .odds_client import OddsClient, POPULAR_SPORTS
 
 app = FastAPI(
@@ -75,6 +75,13 @@ def predictions(sport: str = Query("ligamx")):
     """Predicción de cada partido: quién es más probable que gane y con qué %."""
     evs = client.fetch_events(_sport_key(sport))
     return predict_all(evs)
+
+
+@app.get("/legs", response_model=list[Leg], dependencies=[Depends(check_access)])
+def legs(sport: str = Query("ligamx")):
+    """Patas seleccionables (resultado, goles, ambos anotan) para armar combinadas."""
+    evs = client.fetch_events(_sport_key(sport), markets="h2h,totals,btts")
+    return build_legs(evs)
 
 
 @app.get("/value-bets", response_model=list[ValueBet], dependencies=[Depends(check_access)])

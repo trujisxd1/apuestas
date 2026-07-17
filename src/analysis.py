@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from .models import Event, MatchPrediction, OutcomeProb, ValueBet
+from .models import Event, Leg, MatchPrediction, OutcomeProb, ValueBet
 
 # Traducción de nombres genéricos de resultado.
 _TRAD = {"Draw": "Empate", "Tie": "Empate"}
@@ -19,6 +19,56 @@ _TRAD = {"Draw": "Empate", "Tie": "Empate"}
 
 def _es(name: str) -> str:
     return _TRAD.get(name, name)
+
+
+# Etiquetas legibles de cada mercado.
+_MARKET_LABEL = {"h2h": "Resultado", "totals": "Goles", "btts": "Ambos anotan"}
+
+
+def _leg_selection_text(market: str, raw_name: str) -> str:
+    """Convierte el nombre crudo de la API en texto listo para mostrar."""
+    if market == "totals":
+        # raw_name viene como "Over 2.5" / "Under 2.5" (el punto se dobla en el nombre).
+        parts = raw_name.split()
+        line = parts[-1] if parts and parts[-1].replace(".", "").isdigit() else ""
+        if raw_name.startswith("Over"):
+            return f"Más de {line} goles"
+        if raw_name.startswith("Under"):
+            return f"Menos de {line} goles"
+        return raw_name
+    if market == "btts":
+        if raw_name.lower().startswith("y"):  # Yes
+            return "Ambos anotan: Sí"
+        return "Ambos anotan: No"
+    return _es(raw_name)  # h2h -> nombre del equipo o Empate
+
+
+def build_legs(events: list[Event], markets: tuple[str, ...] = ("h2h", "totals", "btts")) -> list[Leg]:
+    """Lista de patas seleccionables para armar combinadas, con prob. de consenso y mejor cuota."""
+    legs: list[Leg] = []
+    for ev in events:
+        for mk in markets:
+            fair = consensus_probabilities(ev, mk)
+            if not fair:
+                continue
+            best = best_price_per_selection(ev, mk)
+            for raw_name, prob in fair.items():
+                if raw_name not in best or prob <= 0:
+                    continue
+                book, price = best[raw_name]
+                legs.append(
+                    Leg(
+                        event=ev.label,
+                        event_id=ev.id,
+                        market=_MARKET_LABEL.get(mk, mk),
+                        selection=_leg_selection_text(mk, raw_name),
+                        probability=prob,
+                        best_odds=price,
+                        best_bookmaker=book,
+                        commence_time=ev.commence_time,
+                    )
+                )
+    return legs
 
 
 def implied_prob(decimal_odds: float) -> float:

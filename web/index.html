@@ -59,6 +59,16 @@
   .analysis{font-size:14px;color:var(--tx);line-height:1.5;background:var(--card2);border-radius:10px;padding:10px 12px;margin-top:10px}
   .pill.conf{background:rgba(62,166,255,.15);color:var(--acc)}
   .vnote{font-size:12px;color:var(--good);margin-top:8px}
+  .legrow{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;margin:6px 0;cursor:pointer;transition:.15s}
+  .legrow:active{transform:scale(.99)}
+  .legrow.on{border-color:var(--acc);background:rgba(62,166,255,.10)}
+  .legrow .legmark{font-size:10px;text-transform:uppercase;color:var(--mut);width:64px;flex-shrink:0}
+  .legrow .legsel{flex:1;font-weight:600;font-size:14px}
+  .legrow .legodds{font-size:13px;color:var(--mut);white-space:nowrap}
+  .legrow.on .legodds{color:var(--acc)}
+  .legrow .chk{width:18px;height:18px;border:2px solid var(--line);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .legrow.on .chk{background:var(--acc);border-color:var(--acc);color:#04121f}
+  .plleg{font-size:13px;margin:4px 0}
   .empty{color:var(--mut);text-align:center;padding:24px 10px;font-size:14px;line-height:1.5}
   .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--mut);border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
   @keyframes sp{to{transform:rotate(360deg)}}
@@ -93,6 +103,7 @@
       </div>
       <button class="btn" id="goPredict">🔮 Quién puede ganar</button>
       <button class="btn sec" id="goValue">💎 Value</button>
+      <button class="btn sec" id="goParlay">🎰 Combinada</button>
       <button class="btn sec" id="goEvents">Partidos</button>
     </div>
   </div>
@@ -222,6 +233,89 @@ async function loadPredict(){
   }
 }
 
+// ===== Armador de combinadas =====
+let PARLAY_ALL = [];
+let PARLAY_SEL = [];  // índices seleccionados
+
+async function loadParlay(){
+  const sport = $('#sport').value;
+  PARLAY_SEL = [];
+  $('#bestBox').innerHTML=''; $('#result').innerHTML = '<div class="card"><span class="spin"></span> Cargando opciones para combinar…</div>';
+  try{
+    const r = await fetch(withKey('/legs?sport='+encodeURIComponent(sport)));
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const legs = await r.json();
+    PARLAY_ALL = legs;
+    const demo = isDemoData(legs,'sport');
+    if(KEY_CONFIGURED && demo){ setMode('blocked'); } else if(demo){ setMode('demo'); }
+    if(!legs.length){ $('#result').innerHTML='<div class="card"><div class="empty">Sin opciones para combinar en esta liga ahora.</div></div>'; return; }
+    renderParlayList();
+  }catch(e){
+    $('#result').innerHTML = `<div class="card"><div class="err">No pude consultar la API. Detalle: ${e.message}</div></div>`;
+  }
+}
+
+function renderParlayList(){
+  const groups = {};
+  PARLAY_ALL.forEach((l,i)=>{ (groups[l.event] ||= []).push(i); });
+  let html = `<div class="analysis" style="margin:6px 4px">🎰 Toca las patas que quieras combinar (mejor de <b>distintos partidos</b>). Abajo verás la matemática real de tu combinada.</div>`;
+  for(const [event, idxs] of Object.entries(groups)){
+    html += `<div class="card"><div class="name" style="margin-bottom:8px">${event}</div>`;
+    idxs.forEach(i=>{
+      const l = PARLAY_ALL[i];
+      const on = PARLAY_SEL.includes(i);
+      html += `<div class="legrow ${on?'on':''}" data-i="${i}">
+        <span class="chk">${on?'✓':''}</span>
+        <span class="legmark">${l.market}</span>
+        <span class="legsel">${l.selection}</span>
+        <span class="legodds">${(l.probability*100).toFixed(0)}% · ${l.best_odds.toFixed(2)}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  $('#result').innerHTML = html;
+  updateParlaySummary();
+}
+
+function updateParlaySummary(){
+  if(PARLAY_SEL.length === 0){
+    $('#bestBox').innerHTML = `<div class="card"><div class="empty">🎰 Selecciona <b>2 o más patas</b> abajo para armar tu combinada y ver su probabilidad real.</div></div>`;
+    return;
+  }
+  const chosen = PARLAY_SEL.map(i=>PARLAY_ALL[i]);
+  const prob = chosen.reduce((a,l)=>a*l.probability,1);
+  const odds = chosen.reduce((a,l)=>a*l.best_odds,1);
+  const stake = 10;
+  const payout = stake*odds;
+  const edge = (prob*odds - 1)*100;
+  const sameEvent = (new Set(chosen.map(l=>l.event)).size < chosen.length);
+
+  const legsList = chosen.map(l=>`<div class="plleg">✔ <b>${l.selection}</b> <span class="mut">· ${l.event} · cuota ${l.best_odds.toFixed(2)}</span></div>`).join('');
+  const probCls = prob>=0.30 ? 'edge' : (prob>=0.15 ? 'warn' : 'bad');
+
+  let verdict = `Tu combinada de <b>${chosen.length} patas</b> tiene <b>${(prob*100).toFixed(1)}%</b> de probabilidad de entrar completa. `;
+  if(chosen.length<2){ verdict = 'Agrega al menos otra pata para que sea combinada.'; }
+  else {
+    verdict += `Con $10 ganarías <b>${money(payout-stake)}</b> netos si aciertan todas. `;
+    if(prob < 0.15) verdict += `⚠️ Menos de 15%: es prácticamente un billete de lotería. `;
+    if(edge < 0) verdict += `El value es <b class="bad">${edge.toFixed(1)}%</b> — negativo, como casi toda combinada: entre más patas, más difícil. Diviértete, pero apuesta poco.`;
+    else verdict += `Curiosamente el value sale <b class="edge">+${edge.toFixed(1)}%</b> (raro en combinadas).`;
+  }
+
+  $('#bestBox').innerHTML = `<div class="card best">
+    <div class="tag">🎰 Tu combinada (${chosen.length} patas)</div>
+    <div style="margin:8px 0">${legsList}</div>
+    <div class="kv">
+      <div><div class="l">Prob. que entre</div><div class="v ${probCls}">${(prob*100).toFixed(1)}%</div></div>
+      <div><div class="l">Cuota combinada</div><div class="v">${odds.toFixed(2)}</div></div>
+      <div><div class="l">$10 pagarían</div><div class="v">${money(payout)}</div></div>
+      <div><div class="l">Value</div><div class="v ${edge>=0?'edge':'bad'}">${edge>=0?'+':''}${edge.toFixed(1)}%</div></div>
+    </div>
+    <div class="analysis">${verdict}</div>
+    ${sameEvent?'<div class="vnote" style="color:var(--warn)">⚠️ Tienes patas del mismo partido: están correlacionadas, la probabilidad real puede variar de este cálculo.</div>':''}
+  </div>`;
+}
+
 async function loadValue(){
   const sport = $('#sport').value;
   $('#bestBox').innerHTML=''; $('#result').innerHTML = '<div class="card"><span class="spin"></span> Analizando cuotas…</div>';
@@ -268,7 +362,21 @@ async function loadEvents(){
 
 $('#goPredict').onclick = loadPredict;
 $('#goValue').onclick = loadValue;
+$('#goParlay').onclick = loadParlay;
 $('#goEvents').onclick = loadEvents;
+
+// Clic en una pata de la combinada (delegado, porque la lista se re-dibuja).
+$('#result').addEventListener('click', e=>{
+  const row = e.target.closest('.legrow');
+  if(!row) return;
+  const i = parseInt(row.dataset.i, 10);
+  const pos = PARLAY_SEL.indexOf(i);
+  if(pos === -1) PARLAY_SEL.push(i); else PARLAY_SEL.splice(pos,1);
+  row.classList.toggle('on');
+  row.querySelector('.chk').textContent = row.classList.contains('on') ? '✓' : '';
+  updateParlaySummary();
+});
+
 loadInfo(); loadPredict();
 </script>
 </body>

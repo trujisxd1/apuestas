@@ -39,10 +39,13 @@ class OddsClient:
         for bm in raw.get("bookmakers", []):
             title = bm.get("title", bm.get("key", "?"))
             for mk in bm.get("markets", []):
-                outcomes = [
-                    Outcome(name=o["name"], price=float(o["price"]))
-                    for o in mk.get("outcomes", [])
-                ]
+                outcomes = []
+                for o in mk.get("outcomes", []):
+                    name = o["name"]
+                    # En totals/spreads la línea (2.5, etc.) viene aparte: la doblamos en el nombre.
+                    if o.get("point") is not None:
+                        name = f"{name} {o['point']}"
+                    outcomes.append(Outcome(name=name, price=float(o["price"])))
                 if outcomes:
                     markets.append(
                         BookmakerMarket(bookmaker=title, market=mk["key"], outcomes=outcomes)
@@ -66,17 +69,28 @@ class OddsClient:
             return demo_events(sport_key)
 
         url = f"{self.base}/sports/{sport_key}/odds"
-        params = {
-            "apiKey": self.key,
-            "regions": self.regions,
-            "markets": markets,
-            "oddsFormat": self.fmt,
-        }
-        try:
+
+        def _call(mkts: str):
+            params = {
+                "apiKey": self.key,
+                "regions": self.regions,
+                "markets": mkts,
+                "oddsFormat": self.fmt,
+            }
             with httpx.Client(timeout=20.0) as client:
                 resp = client.get(url, params=params)
                 resp.raise_for_status()
-                data = resp.json()
+                return resp.json()
+
+        try:
+            try:
+                data = _call(markets)
+            except httpx.HTTPStatusError:
+                # Algún mercado (ej. btts) puede no existir para este deporte: reintenta con h2h.
+                if markets != "h2h":
+                    data = _call("h2h")
+                else:
+                    raise
             return [self._parse_event(e) for e in data]
         except (httpx.TransportError, httpx.HTTPStatusError) as exc:
             # Red corporativa bloqueando el host, o API caída: degradar a demo con aviso.
@@ -126,6 +140,18 @@ def demo_events(sport_key: str = "soccer_mexico_ligamx") -> list[Event]:
             ],
         )
 
+    def totals(book: str, over: float, under: float):
+        return BookmakerMarket(
+            bookmaker=book, market="totals",
+            outcomes=[Outcome(name="Over 2.5", price=over), Outcome(name="Under 2.5", price=under)],
+        )
+
+    def btts(book: str, yes: float, no: float):
+        return BookmakerMarket(
+            bookmaker=book, market="btts",
+            outcomes=[Outcome(name="Yes", price=yes), Outcome(name="No", price=no)],
+        )
+
     # Partido 1: mercado parejo, SIN value real (todas las casas coinciden).
     ev1 = Event(
         id="demo-juarez-puebla",
@@ -139,6 +165,9 @@ def demo_events(sport_key: str = "soccer_mexico_ligamx") -> list[Event]:
             mk("Pinnacle", 1.92, 3.35, 4.10, "FC Juárez", "Puebla"),
             mk("DraftKings", 1.88, 3.45, 4.25, "FC Juárez", "Puebla"),
             mk("Caliente", 1.89, 3.30, 4.15, "FC Juárez", "Puebla"),
+            totals("Bet365", 2.05, 1.75), totals("Pinnacle", 2.08, 1.73),
+            totals("Caliente", 2.00, 1.80),
+            btts("Bet365", 1.95, 1.85), btts("Caliente", 1.90, 1.90),
         ],
     )
 
@@ -155,6 +184,9 @@ def demo_events(sport_key: str = "soccer_mexico_ligamx") -> list[Event]:
             mk("Pinnacle", 1.83, 3.55, 4.70, "León", "Atlas"),
             mk("DraftKings", 1.86, 3.60, 4.50, "León", "Atlas"),
             mk("Caliente", 1.80, 4.30, 4.40, "León", "Atlas"),  # empate inflado
+            totals("Bet365", 1.90, 1.90), totals("Pinnacle", 1.88, 1.92),
+            totals("Caliente", 1.85, 1.95),
+            btts("Bet365", 1.80, 2.00), btts("Caliente", 1.75, 2.05),
         ],
     )
 

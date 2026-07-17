@@ -54,6 +54,18 @@ class MatchPrediction(BaseModel):
     value_note: str | None = None # aviso si además hay value
 
 
+class Leg(BaseModel):
+    """Una 'pata' seleccionable para una combinada (ej. 'León gana', 'Más de 2.5 goles')."""
+    event: str
+    event_id: str
+    market: str          # etiqueta: Resultado / Goles / Ambos anotan
+    selection: str       # texto listo para mostrar
+    probability: float   # prob. de que esta pata acierte (consenso)
+    best_odds: float     # mejor cuota disponible
+    best_bookmaker: str
+    commence_time: datetime
+
+
 class ValueBet(BaseModel):
     """Una apuesta con value detectado por el motor."""
     event: str
