@@ -33,6 +33,27 @@ class Event(BaseModel):
         return f"{self.home_team} vs {self.away_team}"
 
 
+class OutcomeProb(BaseModel):
+    """Probabilidad de un resultado concreto (ej. 'León' 54%)."""
+    name: str
+    probability: float       # 0-1
+    fair_odds: float         # cuota justa = 1/probabilidad
+
+
+class MatchPrediction(BaseModel):
+    """Predicción de un partido: quién es más probable que gane y con qué probabilidad."""
+    event: str
+    sport: str
+    commence_time: datetime
+    outcomes: list[OutcomeProb]   # ordenados de mayor a menor probabilidad
+    favorite: str
+    favorite_probability: float
+    confidence: str               # etiqueta: favorito fuerte / parejo / etc.
+    analysis: str                 # explicación en texto
+    num_books: int
+    value_note: str | None = None # aviso si además hay value
+
+
 class ValueBet(BaseModel):
     """Una apuesta con value detectado por el motor."""
     event: str

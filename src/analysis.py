@@ -11,7 +11,14 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from .models import Event, ValueBet
+from .models import Event, MatchPrediction, OutcomeProb, ValueBet
+
+# Traducción de nombres genéricos de resultado.
+_TRAD = {"Draw": "Empate", "Tie": "Empate"}
+
+
+def _es(name: str) -> str:
+    return _TRAD.get(name, name)
 
 
 def implied_prob(decimal_odds: float) -> float:
@@ -80,6 +87,87 @@ def kelly_stake(prob: float, decimal_odds: float, bankroll: float, fraction: flo
     full_kelly = (b * prob - (1.0 - prob)) / b
     stake = bankroll * full_kelly * fraction
     return max(0.0, round(stake, 2))
+
+
+def _confidence_label(top_prob: float, is_draw: bool) -> str:
+    """Etiqueta de qué tan claro es el favorito."""
+    if top_prob >= 0.65:
+        return "Favorito fuerte 💪"
+    if top_prob >= 0.55:
+        return "Favorito claro"
+    if top_prob >= 0.45:
+        return "Ligera ventaja"
+    return "Partido muy parejo ⚖️"
+
+
+def predict_match(event: Event, market: str = "h2h", min_books: int = 2) -> MatchPrediction | None:
+    """Predicción de UN partido: probabilidad de cada resultado según el consenso
+    del mercado (la mejor estimación disponible de quién puede ganar)."""
+    fair = consensus_probabilities(event, market)
+    n_books = sum(1 for bm in event.markets if bm.market == market)
+    if not fair or n_books < min_books:
+        return None
+
+    ordered = sorted(fair.items(), key=lambda kv: kv[1], reverse=True)
+    outcomes = [
+        OutcomeProb(name=_es(name), probability=p, fair_odds=(1.0 / p) if p > 0 else 0.0)
+        for name, p in ordered
+    ]
+    fav_name, fav_p = ordered[0]
+    is_draw = _es(fav_name) == "Empate"
+
+    # Texto de análisis.
+    second = ordered[1] if len(ordered) > 1 else None
+    if is_draw:
+        analysis = (
+            f"El mercado ve el partido tan parejo que el resultado más probable es el "
+            f"empate ({fav_p*100:.0f}%). No hay un favorito claro para ganar."
+        )
+    elif fav_p >= 0.65:
+        analysis = (
+            f"{_es(fav_name)} es claramente el más probable para ganar ({fav_p*100:.0f}%). "
+            f"El mercado lo ve como favorito fuerte."
+        )
+    elif fav_p >= 0.50:
+        extra = f" {_es(second[0])} le sigue con {second[1]*100:.0f}%." if second else ""
+        analysis = f"{_es(fav_name)} es favorito ({fav_p*100:.0f}%), pero no es seguro.{extra}"
+    else:
+        extra = f" (vs {_es(second[0])} {second[1]*100:.0f}%)" if second else ""
+        analysis = (
+            f"Partido parejo: {_es(fav_name)} apenas encabeza con {fav_p*100:.0f}%{extra}. "
+            f"Difícil de acertar — cuidado aquí."
+        )
+
+    # ¿Hay value en el favorito? (dato secundario, sin protagonismo)
+    value_note = None
+    best = best_price_per_selection(event, market)
+    if fav_name in best:
+        _, price = best[fav_name]
+        edge = expected_value(fav_p, price) * 100
+        if edge >= 2.0:
+            value_note = (
+                f"Además, la mejor cuota del favorito ({price:.2f}) trae +{edge:.1f}% de value."
+            )
+
+    return MatchPrediction(
+        event=event.label,
+        sport=event.sport_title,
+        commence_time=event.commence_time,
+        outcomes=outcomes,
+        favorite=_es(fav_name),
+        favorite_probability=fav_p,
+        confidence=_confidence_label(fav_p, is_draw),
+        analysis=analysis,
+        num_books=n_books,
+        value_note=value_note,
+    )
+
+
+def predict_all(events: list[Event], market: str = "h2h", min_books: int = 2) -> list[MatchPrediction]:
+    """Predicciones de todos los partidos, ordenadas por claridad del favorito (mayor primero)."""
+    preds = [p for ev in events if (p := predict_match(ev, market, min_books))]
+    preds.sort(key=lambda p: p.favorite_probability, reverse=True)
+    return preds
 
 
 def practical_stake(

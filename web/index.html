@@ -47,6 +47,18 @@
   .bet .pill{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(46,204,113,.15);color:var(--good);white-space:nowrap}
   .bet .meta{font-size:13px;color:var(--mut);margin-top:5px;line-height:1.5}
   .bet b{color:var(--tx)}
+  .fav{font-size:17px;margin:10px 0 12px}
+  .fav b{color:var(--acc)}
+  .prow{display:flex;align-items:center;gap:10px;margin:7px 0}
+  .prow .pl{width:34%;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .prow .pbar{flex:1;height:14px;background:var(--card2);border-radius:7px;overflow:hidden}
+  .prow .pbar>i{display:block;height:100%;border-radius:7px;background:var(--mut);transition:width .4s}
+  .prow.win .pbar>i{background:linear-gradient(90deg,var(--acc),var(--good))}
+  .prow .pv{width:44px;text-align:right;font-weight:700;font-size:14px}
+  .prow.win .pl,.prow.win .pv{color:var(--acc)}
+  .analysis{font-size:14px;color:var(--tx);line-height:1.5;background:var(--card2);border-radius:10px;padding:10px 12px;margin-top:10px}
+  .pill.conf{background:rgba(62,166,255,.15);color:var(--acc)}
+  .vnote{font-size:12px;color:var(--good);margin-top:8px}
   .empty{color:var(--mut);text-align:center;padding:24px 10px;font-size:14px;line-height:1.5}
   .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--mut);border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
   @keyframes sp{to{transform:rotate(360deg)}}
@@ -79,8 +91,9 @@
           <option value="nfl">🏈 NFL</option>
         </select>
       </div>
-      <button class="btn" id="go">Buscar value</button>
-      <button class="btn sec" id="goEvents">Ver partidos</button>
+      <button class="btn" id="goPredict">🔮 Quién puede ganar</button>
+      <button class="btn sec" id="goValue">💎 Value</button>
+      <button class="btn sec" id="goEvents">Partidos</button>
     </div>
   </div>
 
@@ -172,6 +185,43 @@ function betCard(b, isBest){
   </div>`;
 }
 
+function predictionCard(p){
+  const rows = p.outcomes.map(o=>{
+    const pct = o.probability*100;
+    const win = (tr(o.name)===p.favorite);
+    return `<div class="prow ${win?'win':''}">
+      <span class="pl">${win?'✅ ':''}${tr(o.name)}</span>
+      <div class="pbar"><i style="width:${pct.toFixed(0)}%"></i></div>
+      <span class="pv">${pct.toFixed(0)}%</span></div>`;
+  }).join('');
+  return `<div class="card">
+    <div class="bet" style="border:none;padding:0"><div class="top">
+      <span class="name">${p.event}</span><span class="pill conf">${p.confidence}</span></div></div>
+    <div class="fav">🔮 Más probable: <b>${p.favorite}</b> — <b>${(p.favorite_probability*100).toFixed(0)}%</b></div>
+    ${rows}
+    <div class="analysis">${p.analysis}</div>
+    ${p.value_note?`<div class="vnote">💎 ${p.value_note}</div>`:''}
+    <div class="meta" style="color:var(--mut);font-size:12px;margin-top:8px">🕐 ${fmtTime(p.commence_time)} · ${p.sport} · ${p.num_books} casas comparadas</div>
+  </div>`;
+}
+
+async function loadPredict(){
+  const sport = $('#sport').value;
+  $('#bestBox').innerHTML=''; $('#result').innerHTML = '<div class="card"><span class="spin"></span> Analizando probabilidades…</div>';
+  try{
+    const r = await fetch(withKey('/predictions?sport='+encodeURIComponent(sport)));
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const preds = await r.json();
+    const demo = isDemoData(preds,'sport');
+    if(KEY_CONFIGURED && demo){ setMode('blocked'); $('#bestBox').innerHTML = banner('⚠️ <b>Tu red bloquea las cuotas en vivo</b> (típico de redes de trabajo). Mostrando datos <b>DEMO</b>.<br>🏠 Ábrela desde casa o el hotspot del celular para datos reales.'); }
+    else if(demo){ setMode('demo'); }
+    if(!preds.length){ $('#result').innerHTML='<div class="card"><div class="empty">Sin partidos con datos suficientes en esta liga ahora mismo.</div></div>'; return; }
+    $('#result').innerHTML = `<h3 style="margin:8px 4px 0">🔮 Predicciones — quién puede ganar <span class="count">(${preds.length})</span></h3>` + preds.map(predictionCard).join('');
+  }catch(e){
+    $('#result').innerHTML = `<div class="card"><div class="err">No pude consultar la API. ¿Está corriendo el servidor? Detalle: ${e.message}</div></div>`;
+  }
+}
+
 async function loadValue(){
   const sport = $('#sport').value;
   $('#bestBox').innerHTML=''; $('#result').innerHTML = '<div class="card"><span class="spin"></span> Analizando cuotas…</div>';
@@ -216,9 +266,10 @@ async function loadEvents(){
   }
 }
 
-$('#go').onclick = loadValue;
+$('#goPredict').onclick = loadPredict;
+$('#goValue').onclick = loadValue;
 $('#goEvents').onclick = loadEvents;
-loadInfo(); loadValue();
+loadInfo(); loadPredict();
 </script>
 </body>
 </html>
