@@ -1,0 +1,21 @@
+{
+  "hosting": {
+    "public": "web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "src/**",
+      "*.py",
+      "Dockerfile",
+      "requirements.txt"
+    ],
+    "rewrites": [
+      { "source": "/info",       "run": { "serviceId": "value-betting", "region": "us-central1" } },
+      { "source": "/usage",      "run": { "serviceId": "value-betting", "region": "us-central1" } },
+      { "source": "/events",     "run": { "serviceId": "value-betting", "region": "us-central1" } },
+      { "source": "/value-bets", "run": { "serviceId": "value-betting", "region": "us-central1" } },
+      { "source": "/best",       "run": { "serviceId": "value-betting", "region": "us-central1" } }
+    ]
+  }
+}

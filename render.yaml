@@ -1,0 +1,26 @@
+# Blueprint de Render — despliega la plataforma como un servicio web con Docker.
+# Al conectar el repo, Render lee este archivo y crea el servicio solo.
+services:
+  - type: web
+    name: value-betting
+    runtime: docker
+    plan: free            # gratis, sin tarjeta
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /info
+    autoDeploy: true      # redepliega solo al hacer push
+    envVars:
+      - key: ODDS_API_KEY   # SECRETO: lo pones en el panel de Render (no en el código)
+        sync: false
+      - key: ACCESS_KEY     # opcional: clave de acceso; si la pones, abre la app con ?k=...
+        sync: false
+      - key: ODDS_REGIONS
+        value: us,eu
+      - key: BANKROLL
+        value: "100"
+      - key: MIN_EDGE
+        value: "2.0"
+      - key: MIN_STAKE
+        value: "10"
+      - key: MAX_STAKE_PCT
+        value: "15"
