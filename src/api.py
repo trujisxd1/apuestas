@@ -13,6 +13,7 @@ from .analysis import (
     evaluate_parlay,
     find_value_bets,
     predict_all,
+    safe_picks,
     suggest_parlay,
 )
 from .config import settings
@@ -59,7 +60,7 @@ def info():
         "sports": POPULAR_SPORTS,
         "cache": client.cache.stats(),
         "endpoints": [
-            "/predictions", "/legs", "/value-bets", "/best", "/events",
+            "/predictions", "/safe-picks", "/legs", "/value-bets", "/best", "/events",
             "/parlay/suggest", "/parlay/evaluate", "/bets", "/stats", "/usage",
         ],
         "nota": "Apostar es entretenimiento, no una inversión. La casa siempre tiene ventaja.",
@@ -98,6 +99,17 @@ def predictions(sport: str = Query("ligamx")):
     """Predicción de cada partido: quién puede ganar, con qué % y qué tan confiable es."""
     evs = client.fetch_events(_sport_key(sport))
     return predict_all(evs)
+
+
+@app.get("/safe-picks", response_model=list[MatchPrediction], dependencies=[Depends(check_access)])
+def get_safe_picks(
+    sport: str = Query("ligamx"),
+    min_prob: float = Query(0.72, ge=0.5, le=0.95, description="Prob. mínima del favorito (0.5-0.95)"),
+):
+    """MODO ALTA CONFIANZA: solo los pronósticos que casi siempre entran
+    (favorito claro + casas de acuerdo). Lo más cercano a 'apuestas seguras'."""
+    evs = client.fetch_events(_sport_key(sport))
+    return safe_picks(evs, min_prob=min_prob)
 
 
 @app.get("/legs", response_model=list[Leg], dependencies=[Depends(check_access)])

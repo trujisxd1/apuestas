@@ -261,6 +261,37 @@ def predict_all(events: list[Event], market: str = "h2h", min_books: int = 2) ->
     return preds
 
 
+def safe_picks(
+    events: list[Event],
+    *,
+    min_prob: float = 0.72,
+    min_trust: float = 40.0,
+    market: str = "h2h",
+    min_books: int = 2,
+) -> list[MatchPrediction]:
+    """MODO ALTA CONFIANZA: solo los pronósticos que casi siempre entran.
+
+    Un pick entra en la lista solo si cumple TODO esto:
+      - El favorito es un EQUIPO (nunca un empate: un empate nunca es 'seguro').
+      - Su probabilidad de ganar es alta (min_prob, default 72%).
+      - Las casas están de acuerdo (min_trust): si discrepan, no es seguro.
+
+    Ojo honesto: entre más alto pongas min_prob, MENOS partidos aparecen (a veces
+    ninguno) y MENOS pagan. Acertar mucho = ganar poco. Es matemática, no magia.
+    """
+    picks: list[MatchPrediction] = []
+    for ev in events:
+        p = predict_match(ev, market, min_books)
+        if p is None:
+            continue
+        if p.favorite == "Empate":
+            continue
+        if p.favorite_probability >= min_prob and p.trust_score >= min_trust:
+            picks.append(p)
+    picks.sort(key=lambda p: (p.favorite_probability, p.trust_score), reverse=True)
+    return picks
+
+
 # --------------------------------------------------------------- combinadas
 
 def build_legs(events: list[Event], markets: tuple[str, ...] = ("h2h", "totals", "btts")) -> list[Leg]:

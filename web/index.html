@@ -122,16 +122,32 @@
       <div>
         <label>Liga / Deporte</label>
         <select id="sport">
-          <option value="ligamx">⚽ Liga MX</option>
-          <option value="epl">⚽ Premier League</option>
-          <option value="laliga">⚽ LaLiga</option>
-          <option value="champions">⚽ Champions</option>
-          <option value="mlb">⚾ MLB</option>
-          <option value="nba">🏀 NBA</option>
-          <option value="nfl">🏈 NFL</option>
+          <optgroup label="⚽ Fútbol">
+            <option value="ligamx">Liga MX</option>
+            <option value="epl">Premier League</option>
+            <option value="laliga">LaLiga</option>
+            <option value="seriea">Serie A (Italia)</option>
+            <option value="bundesliga">Bundesliga</option>
+            <option value="ligue1">Ligue 1</option>
+            <option value="mls">MLS</option>
+            <option value="champions">Champions League</option>
+            <option value="libertadores">Copa Libertadores</option>
+          </optgroup>
+          <optgroup label="🇺🇸 EE.UU.">
+            <option value="nba">🏀 NBA</option>
+            <option value="nfl">🏈 NFL</option>
+            <option value="mlb">⚾ MLB</option>
+            <option value="nhl">🏒 NHL</option>
+            <option value="ncaab">🏀 NCAA Basket</option>
+          </optgroup>
+          <optgroup label="🥊 Combate">
+            <option value="ufc">UFC / MMA</option>
+            <option value="boxeo">Boxeo</option>
+          </optgroup>
         </select>
       </div>
-      <button class="btn" id="goPredict">🔮 Quién gana</button>
+      <button class="btn" id="goSafe">🔒 Seguras</button>
+      <button class="btn sec" id="goPredict">🔮 Quién gana</button>
       <button class="btn sec" id="goValue">💎 Value</button>
       <button class="btn sec" id="goParlay">🎰 Combinada</button>
       <button class="btn sec" id="goRegistro">📒 Registro</button>
@@ -269,6 +285,40 @@ async function loadPredict(){
     $('#result').innerHTML = `<h3 style="margin:8px 4px 0">🔮 Predicciones — ordenadas por confianza <span class="count">(${preds.length})</span></h3>` + preds.map(predictionCard).join('');
   }catch(e){
     $('#result').innerHTML = `<div class="card"><div class="err">No pude consultar la API. ¿Está corriendo el servidor? Detalle: ${e.message}</div></div>`;
+  }
+}
+
+// ============ MODO ALTA CONFIANZA (SEGURAS) ============
+let SAFE_MINPROB = 0.72;
+async function loadSafe(){
+  const sport = $('#sport').value;
+  $('#bestBox').innerHTML=''; $('#result').innerHTML = '<div class="card"><span class="spin"></span> Buscando las apuestas más seguras…</div>';
+  try{
+    const r = await fetch(withKey('/safe-picks?sport='+encodeURIComponent(sport)+'&min_prob='+SAFE_MINPROB));
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    let preds = await r.json();
+    preds = preds.map(p=>{ const m=(p.my_book_note||'').match(/paga (\d+\.\d+)/); p.my_caliente_odds = m?parseFloat(m[1]):null; return p; });
+    const demo = isDemoData(preds,'sport');
+    if(KEY_CONFIGURED && demo){ setMode('blocked'); } else if(demo){ setMode('demo'); }
+
+    const pct = Math.round(SAFE_MINPROB*100);
+    const slider = `<div class="card"><div style="font-size:13px;margin-bottom:8px">🔒 <b>Modo Alta Confianza</b> — solo muestro favoritos claros con las casas de acuerdo. Nivel mínimo: <b id="spv">${pct}%</b></div>
+      <input type="range" id="spr" min="60" max="90" step="1" value="${pct}" style="width:100%">
+      <div class="mut" style="font-size:12px;margin-top:6px">👉 Más alto = más seguras pero pagan menos y aparecen menos. Es matemática: acertar mucho = ganar poco.</div></div>`;
+
+    if(!preds.length){
+      $('#bestBox').innerHTML = slider;
+      $('#result').innerHTML = `<div class="card"><div class="empty">🔒 Hoy no hay ningún pronóstico que llegue al <b>${pct}%</b> de confianza en esta liga.<br><b>La jugada más inteligente: no apostar</b> (o baja el nivel con la barra de arriba, pero será menos seguro).</div></div>`;
+    } else {
+      const avg = Math.round(preds.reduce((a,p)=>a+p.favorite_probability,0)/preds.length*100);
+      $('#bestBox').innerHTML = slider + `<div class="card best"><div class="tag">🔒 ${preds.length} apuesta(s) de alta confianza</div>
+        <div class="analysis" style="margin-top:8px">Estas son las que <b>más probablemente entran</b> (promedio ${avg}%). Si registras y marcas resultados, la pestaña 📒 Registro te dirá tu acierto real. Recuerda: ni el 90% es garantía — de vez en cuando cae.</div></div>`;
+      $('#result').innerHTML = `<h3 style="margin:8px 4px 0">🔒 Apuestas seguras <span class="count">(${preds.length})</span></h3>` + preds.map(predictionCard).join('');
+    }
+    const sp = $('#spr');
+    if(sp) sp.oninput = ()=>{ $('#spv').textContent = sp.value+'%'; SAFE_MINPROB = sp.value/100; clearTimeout(sp._t); sp._t=setTimeout(loadSafe, 400); };
+  }catch(e){
+    $('#result').innerHTML = `<div class="card"><div class="err">No pude consultar la API. Detalle: ${e.message}</div></div>`;
   }
 }
 
@@ -566,6 +616,7 @@ async function loadEvents(){
   }
 }
 
+$('#goSafe').onclick = loadSafe;
 $('#goPredict').onclick = loadPredict;
 $('#goValue').onclick = loadValue;
 $('#goParlay').onclick = loadParlay;
@@ -583,7 +634,7 @@ $('#result').addEventListener('click', e=>{
   updateParlaySummary();
 });
 
-(async()=>{ await loadInfo(); loadPredict(); })();
+(async()=>{ await loadInfo(); loadSafe(); })();
 </script>
 </body>
 </html>

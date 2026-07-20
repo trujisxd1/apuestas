@@ -12,15 +12,27 @@ from .cache import TTLCache
 from .config import settings
 from .models import Event, BookmakerMarket, Outcome
 
-# Ligas útiles para el usuario (claves de The Odds API).
+# Ligas/deportes útiles para el usuario (claves de The Odds API).
 POPULAR_SPORTS = {
+    # Fútbol
     "ligamx": "soccer_mexico_ligamx",
     "epl": "soccer_epl",
     "laliga": "soccer_spain_la_liga",
+    "seriea": "soccer_italy_serie_a",
+    "bundesliga": "soccer_germany_bundesliga",
+    "ligue1": "soccer_france_ligue_one",
+    "mls": "soccer_usa_mls",
     "champions": "soccer_uefa_champs_league",
-    "mlb": "baseball_mlb",
+    "libertadores": "soccer_conmebol_copa_libertadores",
+    # EE.UU.
     "nba": "basketball_nba",
     "nfl": "americanfootball_nfl",
+    "mlb": "baseball_mlb",
+    "nhl": "icehockey_nhl",
+    "ncaab": "basketball_ncaab",
+    # Combate
+    "ufc": "mma_mixed_martial_arts",
+    "boxeo": "boxing_boxing",
 }
 
 
@@ -216,11 +228,11 @@ def demo_events(sport_key: str = "soccer_mexico_ligamx") -> list[Event]:
         home_team="América",
         away_team="Querétaro",
         markets=[
-            mk("Pinnacle", 1.42, 4.60, 7.50, "América", "Querétaro"),
-            mk("Bet365", 1.40, 4.75, 8.00, "América", "Querétaro"),
-            mk("DraftKings", 1.43, 4.50, 7.20, "América", "Querétaro"),
-            mk("William Hill", 1.41, 4.70, 7.80, "América", "Querétaro"),
-            mk("Caliente", 1.44, 4.40, 7.00, "América", "Querétaro"),
+            mk("Pinnacle", 1.26, 6.00, 11.0, "América", "Querétaro"),
+            mk("Bet365", 1.25, 6.25, 12.0, "América", "Querétaro"),
+            mk("DraftKings", 1.27, 5.80, 10.5, "América", "Querétaro"),
+            mk("William Hill", 1.26, 6.10, 11.5, "América", "Querétaro"),
+            mk("Caliente", 1.28, 5.75, 10.0, "América", "Querétaro"),
             totals("Bet365", 1.75, 2.05), totals("Pinnacle", 1.73, 2.08),
             totals("Caliente", 1.70, 2.10),
             btts("Bet365", 2.00, 1.80), btts("Caliente", 2.05, 1.75),
