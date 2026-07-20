@@ -17,6 +17,22 @@ encuentra cuándo una casa te paga **de más** (ventaja estadística real).
    probabilidad → hay **VALUE** (+EV). El motor lo detecta y calcula cuánto apostar
    con **Kelly fraccionado** (conservador).
 
+### Mejoras del motor (v2)
+
+- **De-vig ponderado**: quita el margen con el método de **potencia/Shin** (corrige
+  el sesgo favorito-underdog, no solo divide entre la suma).
+- **Casas "sharp" pesan más**: Pinnacle y los exchanges predicen mejor que una casa
+  local, así que aportan más al consenso. Las casas con margen absurdo se descartan.
+- **Nivel de confianza**: cada predicción trae qué tan de acuerdo están las casas
+  (*acuerdo*), cuántas se usaron y una etiqueta 🟢🟡🟠🔴 de confiabilidad.
+- **Enfocado en Caliente**: te dice cómo se ve la apuesta **en tu casa**, no solo
+  "la mejor cuota está en Pinnacle" (que no puedes apostar). Filtro *solo Caliente*.
+- **Combinadas automáticas**: `/parlay/suggest` arma una combinada sensata (una pata
+  por partido) con la matemática real; o ármala tú y ve probabilidad y value al vuelo.
+- **Registro real (bankroll)**: apunta cada apuesta, marca ganada/perdida y ve tu
+  **ROI, racha, acierto y calibración** del motor. Con **límite diario** que no te deja pasarte.
+- **Caché** de 10 min para no quemar las 500 consultas/mes gratuitas de la API.
+
 ## Instalación
 
 ```bash
@@ -56,15 +72,30 @@ uvicorn src.api:app --reload
 
 Luego abre <http://127.0.0.1:8000/docs> (documentación interactiva). Endpoints:
 
-| Endpoint       | Qué hace                                    |
-|----------------|---------------------------------------------|
-| `GET /`        | Estado y configuración                      |
-| `GET /events`  | Eventos con cuotas de todas las casas       |
-| `GET /value-bets` | Todas las apuestas con value              |
-| `GET /best`    | La mejor apuesta (mayor value)              |
-| `GET /usage`   | Requests restantes de tu API key            |
+| Endpoint                  | Qué hace                                         |
+|---------------------------|--------------------------------------------------|
+| `GET /`                   | Panel web                                        |
+| `GET /info`               | Estado, config, caché                            |
+| `GET /predictions`        | Quién puede ganar, con % y confiabilidad         |
+| `GET /events`             | Eventos con cuotas de todas las casas            |
+| `GET /value-bets`         | Apuestas con value (`?only_caliente=true`)       |
+| `GET /best`               | La mejor apuesta (mayor value)                   |
+| `GET /legs`               | Patas seleccionables para combinar               |
+| `GET /parlay/suggest`     | Combinada armada por el motor (`?size=3`)        |
+| `POST /parlay/evaluate`   | Evalúa una combinada tuya                        |
+| `GET /bets` · `POST /bets`| Historial / registrar apuesta                    |
+| `POST /bets/{id}/settle`  | Marcar ganada/perdida/nula                       |
+| `GET /stats`              | Bankroll, ROI, racha, calibración                |
+| `GET /usage`              | Requests restantes de tu API key                 |
 
-Parámetro `?sport=ligamx` (o mlb, epl…) en todos.
+Parámetro `?sport=ligamx` (o mlb, epl…) en los de lectura.
+
+## Pruebas
+
+```bash
+python -m pytest tests/ -q        # con pytest
+python tests/test_engine.py       # sin pytest (resumen rápido)
+```
 
 ## Estructura
 
@@ -72,10 +103,15 @@ Parámetro `?sport=ligamx` (o mlb, epl…) en todos.
 betting-platform/
 ├── src/
 │   ├── config.py       # configuración desde .env
-│   ├── models.py       # tipos de datos (Event, ValueBet…)
-│   ├── odds_client.py  # cliente The Odds API + modo demo
-│   ├── analysis.py     # de-vig, EV, Kelly, detección de value  ← el cerebro
+│   ├── models.py       # tipos de datos (Event, ValueBet, ParlayEvaluation…)
+│   ├── odds_client.py  # cliente The Odds API + modo demo + caché
+│   ├── devig.py        # de-vig ponderado (potencia/Shin) + consenso  ← el cerebro
+│   ├── analysis.py     # predicción, EV, Kelly, value, combinadas
+│   ├── cache.py        # caché en memoria con expiración
+│   ├── store.py        # registro de apuestas en SQLite (bankroll real)
 │   └── api.py          # API FastAPI
+├── web/index.html      # panel web
+├── tests/test_engine.py
 ├── cli.py              # línea de comandos
 ├── requirements.txt
 └── .env.example

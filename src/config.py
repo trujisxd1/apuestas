@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     min_stake: float = 10.0
     # Tope de seguridad: nunca apostar más de este % del bankroll en una jugada.
     max_stake_pct: float = 15.0
+    # Límite de gasto diario (pesos). El registro no te deja pasarte. 0 = sin límite.
+    daily_cap: float = 40.0
+    # Cuánto tiempo (segundos) se guardan las cuotas en caché para no quemar la cuota
+    # de la API gratuita (500 consultas/mes). 600 = 10 minutos.
+    cache_ttl: float = 600.0
     # Clave de acceso opcional (para que nadie te queme la cuota de la API).
     # Vacía = acceso libre. Si la pones, hay que abrir la app con ?k=TU_CLAVE
     access_key: str = ""

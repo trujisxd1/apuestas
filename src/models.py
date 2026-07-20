@@ -52,6 +52,12 @@ class MatchPrediction(BaseModel):
     analysis: str                 # explicación en texto
     num_books: int
     value_note: str | None = None # aviso si además hay value
+    # --- calidad de la predicción ---
+    agreement: float = 0.0        # 0-100: qué tanto coinciden las casas
+    reliability: str = ""         # etiqueta de confiabilidad del dato
+    trust_score: float = 0.0      # 0-100: confianza global (casas + acuerdo + margen)
+    market_overround: float = 0.0 # margen promedio del mercado en %
+    my_book_note: str | None = None  # cómo se ve en TU casa (Caliente)
 
 
 class Leg(BaseModel):
@@ -64,6 +70,30 @@ class Leg(BaseModel):
     best_odds: float     # mejor cuota disponible
     best_bookmaker: str
     commence_time: datetime
+    agreement: float = 0.0            # 0-100: acuerdo entre casas
+    my_book_odds: float | None = None # cuota en TU casa (Caliente), si la hay
+
+
+class ParlayLegResult(BaseModel):
+    """Cómo queda una pata dentro de la combinada evaluada."""
+    event: str
+    selection: str
+    probability: float
+    odds: float
+    bookmaker: str
+
+
+class ParlayEvaluation(BaseModel):
+    """Evaluación matemática de una combinada armada."""
+    legs: list[ParlayLegResult]
+    combined_probability: float   # prob. de que entren TODAS
+    combined_odds: float          # cuota total
+    fair_odds: float              # cuota justa (1/prob)
+    edge_pct: float               # value de la combinada
+    stake_suggestion: float
+    payout: float                 # cuánto pagaría con ese stake
+    verdict: str                  # veredicto en texto claro
+    warnings: list[str] = Field(default_factory=list)
 
 
 class ValueBet(BaseModel):

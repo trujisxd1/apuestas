@@ -25,21 +25,25 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
   .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
   label{display:block;font-size:12px;color:var(--mut);margin-bottom:5px}
-  select,button{border-radius:10px;padding:11px 14px;font-size:15px;font-family:inherit;border:1px solid var(--line)}
-  select{background:var(--card2);color:var(--tx);min-width:200px}
+  select,button,input{border-radius:10px;padding:11px 14px;font-size:15px;font-family:inherit;border:1px solid var(--line)}
+  select{background:var(--card2);color:var(--tx);min-width:180px}
+  input{background:var(--card2);color:var(--tx);width:100%}
   button{border:none;font-weight:700;cursor:pointer}
   .btn{background:var(--acc);color:#04121f}
   .btn.sec{background:var(--card2);color:var(--tx);border:1px solid var(--line)}
+  .btn.sm{padding:7px 11px;font-size:13px;border-radius:9px}
+  .btn.ok{background:var(--good);color:#04121f}
+  .btn.no{background:rgba(255,92,108,.18);color:var(--bad)}
   button:active{transform:translateY(1px)}
   .best{background:linear-gradient(135deg,rgba(62,166,255,.14),rgba(46,204,113,.10));border:1px solid rgba(62,166,255,.35)}
   .best .tag{font-size:12px;font-weight:700;color:var(--acc);letter-spacing:.5px;text-transform:uppercase}
   .best .ev{font-size:20px;font-weight:800;margin:6px 0 2px}
   .best .pick{font-size:16px;margin:8px 0}
-  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:12px}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:12px}
   .kv div{background:var(--card2);border-radius:10px;padding:9px 11px}
   .kv .l{font-size:11px;color:var(--mut);text-transform:uppercase}
   .kv .v{font-size:18px;font-weight:700;margin-top:2px}
-  .edge{color:var(--good)}
+  .edge{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
   .bet{border-bottom:1px solid var(--line);padding:14px 0}
   .bet:last-child{border:none}
   .bet .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
@@ -58,17 +62,25 @@
   .prow.win .pl,.prow.win .pv{color:var(--acc)}
   .analysis{font-size:14px;color:var(--tx);line-height:1.5;background:var(--card2);border-radius:10px;padding:10px 12px;margin-top:10px}
   .pill.conf{background:rgba(62,166,255,.15);color:var(--acc)}
-  .vnote{font-size:12px;color:var(--good);margin-top:8px}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px;background:var(--card2);color:var(--mut)}
+  .badges{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 2px}
+  .trust-hi{background:rgba(46,204,113,.15);color:var(--good)}
+  .trust-md{background:rgba(255,176,32,.15);color:var(--warn)}
+  .trust-lo{background:rgba(255,92,108,.15);color:var(--bad)}
+  .vnote{font-size:13px;color:var(--good);margin-top:8px;line-height:1.5}
+  .cnote{font-size:13px;margin-top:8px;line-height:1.5;background:rgba(62,166,255,.10);border:1px solid rgba(62,166,255,.28);border-radius:10px;padding:9px 11px}
+  .cnote.good{background:rgba(46,204,113,.10);border-color:rgba(46,204,113,.3)}
   .legrow{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;margin:6px 0;cursor:pointer;transition:.15s}
   .legrow:active{transform:scale(.99)}
   .legrow.on{border-color:var(--acc);background:rgba(62,166,255,.10)}
   .legrow .legmark{font-size:10px;text-transform:uppercase;color:var(--mut);width:64px;flex-shrink:0}
   .legrow .legsel{flex:1;font-weight:600;font-size:14px}
-  .legrow .legodds{font-size:13px;color:var(--mut);white-space:nowrap}
+  .legrow .legodds{font-size:13px;color:var(--mut);white-space:nowrap;text-align:right}
   .legrow.on .legodds{color:var(--acc)}
   .legrow .chk{width:18px;height:18px;border:2px solid var(--line);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px}
   .legrow.on .chk{background:var(--acc);border-color:var(--acc);color:#04121f}
   .plleg{font-size:13px;margin:4px 0}
+  .mut{color:var(--mut)}
   .empty{color:var(--mut);text-align:center;padding:24px 10px;font-size:14px;line-height:1.5}
   .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--mut);border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
   @keyframes sp{to{transform:rotate(360deg)}}
@@ -77,6 +89,24 @@
   .err{background:rgba(255,92,108,.12);border:1px solid rgba(255,92,108,.3);color:var(--bad);border-radius:10px;padding:12px;font-size:13px}
   h3{font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
   .count{font-size:12px;color:var(--mut);font-weight:400}
+  .rowline{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding:11px 0}
+  .rowline:last-child{border:none}
+  .st{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap}
+  .st.pendiente{background:rgba(139,152,166,.18);color:var(--mut)}
+  .st.ganada{background:rgba(46,204,113,.16);color:var(--good)}
+  .st.perdida{background:rgba(255,92,108,.16);color:var(--bad)}
+  .st.nula{background:rgba(255,176,32,.16);color:var(--warn)}
+  .actions{display:flex;gap:6px;flex-wrap:wrap}
+  /* modal */
+  .ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+  .ov.on{display:flex}
+  .modal{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:400px;width:100%;box-shadow:var(--shadow)}
+  .modal h3{font-size:17px}
+  .fld{margin:10px 0}
+  .fld label{margin-bottom:6px}
+  .modal .row2{display:flex;gap:10px}
+  .modal .row2>div{flex:1}
+  .warnbox{font-size:12px;color:var(--warn);background:rgba(255,176,32,.1);border-radius:8px;padding:8px 10px;margin-top:8px}
 </style>
 </head>
 <body>
@@ -101,9 +131,10 @@
           <option value="nfl">🏈 NFL</option>
         </select>
       </div>
-      <button class="btn" id="goPredict">🔮 Quién puede ganar</button>
+      <button class="btn" id="goPredict">🔮 Quién gana</button>
       <button class="btn sec" id="goValue">💎 Value</button>
       <button class="btn sec" id="goParlay">🎰 Combinada</button>
+      <button class="btn sec" id="goRegistro">📒 Registro</button>
       <button class="btn sec" id="goEvents">Partidos</button>
     </div>
   </div>
@@ -118,43 +149,59 @@
   </div>
 </div>
 
+<!-- Modal para registrar una apuesta -->
+<div class="ov" id="ov">
+  <div class="modal">
+    <h3>📝 Registrar apuesta</h3>
+    <div class="fld"><label>Partido</label><input id="m_event" readonly></div>
+    <div class="fld"><label>A quién le apuestas</label><input id="m_sel" readonly></div>
+    <div class="row2">
+      <div class="fld"><label>Cuota (Caliente)</label><input id="m_odds" type="number" step="0.01"></div>
+      <div class="fld"><label>Monto $ (pesos)</label><input id="m_stake" type="number" step="1"></div>
+    </div>
+    <div id="m_warn"></div>
+    <div class="controls" style="margin-top:14px;justify-content:flex-end">
+      <button class="btn sec sm" id="m_cancel">Cancelar</button>
+      <button class="btn sm" id="m_save">Guardar apuesta</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const $ = s => document.querySelector(s);
 
-// Clave de acceso opcional: se toma de ?k=... en la URL y se recuerda.
 const _url = new URL(location.href);
 if(_url.searchParams.get('k')) localStorage.setItem('ak', _url.searchParams.get('k'));
 const ACCESS_KEY = localStorage.getItem('ak') || '';
 const withKey = url => ACCESS_KEY ? url + (url.includes('?') ? '&' : '?') + 'k=' + encodeURIComponent(ACCESS_KEY) : url;
+const jkey = () => ACCESS_KEY ? {'x-access-key':ACCESS_KEY} : {};
 
 const money = n => '$' + Number(n).toFixed(2) + ' MXN';
+const money0 = n => '$' + Math.round(Number(n)) + ' MXN';
 const fmtTime = iso => { try{ return new Date(iso).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}catch{return iso;} };
 
-// Traduce nombres de selección que la API manda en inglés.
 const TRAD = { 'Draw':'Empate', 'Tie':'Empate', 'Over':'Más de', 'Under':'Menos de', 'Yes':'Sí', 'No':'No' };
 const tr = name => TRAD[name] || name;
 
 let KEY_CONFIGURED = false;
+let BANKROLL = 100, DAILY_CAP = 0, REMAIN_TODAY = null;
 
 function setMode(state){
-  // state: 'live' | 'demo' | 'blocked' | 'offline'
-  const map = {
-    live:    ['CUOTAS EN VIVO','live'],
-    demo:    ['MODO DEMO','demo'],
-    blocked: ['RED BLOQUEA API · DEMO','demo'],
-    offline: ['API OFFLINE','demo'],
-  };
+  const map = { live:['CUOTAS EN VIVO','live'], demo:['MODO DEMO','demo'],
+    blocked:['RED BLOQUEA API · DEMO','demo'], offline:['API OFFLINE','demo'] };
   const [txt,cls] = map[state] || map.offline;
   $('#mode').textContent = txt; $('#mode').className = 'mode '+cls;
 }
 
 async function loadInfo(){
   try{
-    const r = await fetch('/info'); const d = await r.json();
+    const r = await fetch(withKey('/info')); const d = await r.json();
     KEY_CONFIGURED = d.mode && d.mode.startsWith('live');
+    BANKROLL = d.bankroll; DAILY_CAP = d.daily_cap || 0;
     setMode(KEY_CONFIGURED ? 'live' : 'demo');
-    $('#sub').innerHTML = `Bankroll: <b>${money(d.bankroll)}</b> · ` +
-      (KEY_CONFIGURED ? 'jalando cuotas reales de The Odds API.' :
+    const cacheTxt = d.cache && d.cache.aciertos ? ` · caché ahorró ${d.cache.aciertos} consultas` : '';
+    $('#sub').innerHTML = `Bankroll: <b>${money0(d.bankroll)}</b> · límite diario <b>${money0(d.daily_cap)}</b> · ` +
+      (KEY_CONFIGURED ? `cuotas reales de The Odds API${cacheTxt}.` :
        'sin API key → datos de ejemplo. Pon tu key en <code>.env</code> para cuotas reales.');
   }catch(e){ setMode('offline'); }
 }
@@ -163,39 +210,15 @@ function banner(html){
   return `<div class="card" style="background:rgba(255,176,32,.12);border-color:rgba(255,176,32,.4)">
     <div style="font-size:13px;line-height:1.6">${html}</div></div>`;
 }
+function isDemoData(items, field){ return items.length>0 && items.some(x => /DEMO/i.test(x[field]||'')); }
 
-// Detecta si la respuesta vino de datos demo (fallback por red bloqueada).
-function isDemoData(items, field){
-  return items.length>0 && items.some(x => /DEMO/i.test(x[field]||''));
+function trustBadge(p){
+  const t = p.trust_score;
+  const cls = t>=60?'trust-hi':(t>=35?'trust-md':'trust-lo');
+  return `<span class="badge ${cls}">${p.reliability}</span>`;
 }
 
-function betCard(b, isBest){
-  const when = fmtTime(b.commence_time);
-  const sel = tr(b.selection);
-  if(isBest){
-    return `<div class="card best">
-      <div class="tag">⭐ Mejor apuesta</div>
-      <div class="ev">${b.event}</div>
-      <div class="pick">👉 Apuéstale a: <b style="font-size:20px;color:var(--acc)">${sel}</b></div>
-      <div class="pick" style="font-size:14px;color:var(--mut);margin-top:2px">a cuota <b>${b.best_price.toFixed(2)}</b> en <b>${b.best_bookmaker}</b> · monto sugerido <b>${money(b.stake_suggestion)}</b></div>
-      <div class="kv">
-        <div><div class="l">Value</div><div class="v edge">+${b.edge_pct.toFixed(1)}%</div></div>
-        <div><div class="l">Cuánto apostar</div><div class="v">${money(b.stake_suggestion)}</div></div>
-        <div><div class="l">Cuota justa</div><div class="v">${b.fair_price.toFixed(2)}</div></div>
-        <div><div class="l">Prob. de acertar</div><div class="v">${(b.fair_probability*100).toFixed(1)}%</div></div>
-        <div><div class="l">Casas comparadas</div><div class="v">${b.num_books}</div></div>
-      </div>
-      <div class="meta" style="color:var(--mut);font-size:12px;margin-top:10px">🕐 ${when} · ${b.sport}</div>
-    </div>`;
-  }
-  return `<div class="bet">
-    <div class="top"><span class="name">${b.event}</span><span class="pill">+${b.edge_pct.toFixed(1)}% value</span></div>
-    <div class="meta">👉 Apuéstale a: <b style="color:var(--acc)">${sel}</b> · cuota <b>${b.best_price.toFixed(2)}</b> en ${b.best_bookmaker}
-      · cuota justa ${b.fair_price.toFixed(2)} · apostar <b>${money(b.stake_suggestion)}</b><br>
-      🕐 ${when} · ${b.sport} · ${b.num_books} casas comparadas</div>
-  </div>`;
-}
-
+// ============ PREDICCIONES ============
 function predictionCard(p){
   const rows = p.outcomes.map(o=>{
     const pct = o.probability*100;
@@ -205,14 +228,28 @@ function predictionCard(p){
       <div class="pbar"><i style="width:${pct.toFixed(0)}%"></i></div>
       <span class="pv">${pct.toFixed(0)}%</span></div>`;
   }).join('');
+
+  const caliente = p.my_book_note
+    ? `<div class="cnote ${/SÍ puedes/.test(p.my_book_note)?'good':''}">🎯 ${p.my_book_note}</div>` : '';
+
   return `<div class="card">
     <div class="bet" style="border:none;padding:0"><div class="top">
       <span class="name">${p.event}</span><span class="pill conf">${p.confidence}</span></div></div>
     <div class="fav">🔮 Más probable: <b>${p.favorite}</b> — <b>${(p.favorite_probability*100).toFixed(0)}%</b></div>
     ${rows}
+    <div class="badges">
+      ${trustBadge(p)}
+      <span class="badge">🤝 Acuerdo casas ${p.agreement.toFixed(0)}%</span>
+      <span class="badge">🏦 ${p.num_books} casas</span>
+      <span class="badge">✂️ Margen ${p.market_overround.toFixed(1)}%</span>
+    </div>
     <div class="analysis">${p.analysis}</div>
+    ${caliente}
     ${p.value_note?`<div class="vnote">💎 ${p.value_note}</div>`:''}
-    <div class="meta" style="color:var(--mut);font-size:12px;margin-top:8px">🕐 ${fmtTime(p.commence_time)} · ${p.sport} · ${p.num_books} casas comparadas</div>
+    <div class="actions" style="margin-top:12px">
+      <button class="btn sm" onclick='openReg(${JSON.stringify(p.event)}, ${JSON.stringify(p.favorite)}, ${p.my_caliente_odds||'null'}, ${p.favorite_probability}, "Resultado")'>➕ Registrar esta apuesta</button>
+    </div>
+    <div class="meta" style="color:var(--mut);font-size:12px;margin-top:10px">🕐 ${fmtTime(p.commence_time)} · ${p.sport}</div>
   </div>`;
 }
 
@@ -222,20 +259,78 @@ async function loadPredict(){
   try{
     const r = await fetch(withKey('/predictions?sport='+encodeURIComponent(sport)));
     if(!r.ok) throw new Error('HTTP '+r.status);
-    const preds = await r.json();
+    let preds = await r.json();
+    // extrae la cuota de Caliente del texto para el botón de registrar
+    preds = preds.map(p=>{ const m=(p.my_book_note||'').match(/paga (\d+\.\d+)/); p.my_caliente_odds = m?parseFloat(m[1]):null; return p; });
     const demo = isDemoData(preds,'sport');
     if(KEY_CONFIGURED && demo){ setMode('blocked'); $('#bestBox').innerHTML = banner('⚠️ <b>Tu red bloquea las cuotas en vivo</b> (típico de redes de trabajo). Mostrando datos <b>DEMO</b>.<br>🏠 Ábrela desde casa o el hotspot del celular para datos reales.'); }
     else if(demo){ setMode('demo'); }
     if(!preds.length){ $('#result').innerHTML='<div class="card"><div class="empty">Sin partidos con datos suficientes en esta liga ahora mismo.</div></div>'; return; }
-    $('#result').innerHTML = `<h3 style="margin:8px 4px 0">🔮 Predicciones — quién puede ganar <span class="count">(${preds.length})</span></h3>` + preds.map(predictionCard).join('');
+    $('#result').innerHTML = `<h3 style="margin:8px 4px 0">🔮 Predicciones — ordenadas por confianza <span class="count">(${preds.length})</span></h3>` + preds.map(predictionCard).join('');
   }catch(e){
     $('#result').innerHTML = `<div class="card"><div class="err">No pude consultar la API. ¿Está corriendo el servidor? Detalle: ${e.message}</div></div>`;
   }
 }
 
-// ===== Armador de combinadas =====
-let PARLAY_ALL = [];
-let PARLAY_SEL = [];  // índices seleccionados
+// ============ VALUE ============
+function betCard(b, isBest){
+  const when = fmtTime(b.commence_time);
+  const sel = tr(b.selection);
+  const reg = `<button class="btn sm" onclick='openReg(${JSON.stringify(b.event)}, ${JSON.stringify(sel)}, ${b.best_price}, ${b.fair_probability}, "Resultado")'>➕ Registrar</button>`;
+  if(isBest){
+    return `<div class="card best">
+      <div class="tag">⭐ Mejor apuesta</div>
+      <div class="ev">${b.event}</div>
+      <div class="pick">👉 Apuéstale a: <b style="font-size:20px;color:var(--acc)">${sel}</b></div>
+      <div class="pick" style="font-size:14px;color:var(--mut);margin-top:2px">a cuota <b>${b.best_price.toFixed(2)}</b> en <b>${b.best_bookmaker}</b> · monto sugerido <b>${money0(b.stake_suggestion)}</b></div>
+      <div class="kv">
+        <div><div class="l">Value</div><div class="v edge">+${b.edge_pct.toFixed(1)}%</div></div>
+        <div><div class="l">Cuánto apostar</div><div class="v">${money0(b.stake_suggestion)}</div></div>
+        <div><div class="l">Cuota justa</div><div class="v">${b.fair_price.toFixed(2)}</div></div>
+        <div><div class="l">Prob. de acertar</div><div class="v">${(b.fair_probability*100).toFixed(1)}%</div></div>
+        <div><div class="l">Casas</div><div class="v">${b.num_books}</div></div>
+      </div>
+      <div class="actions" style="margin-top:12px">${reg}</div>
+      <div class="meta" style="color:var(--mut);font-size:12px;margin-top:10px">🕐 ${when} · ${b.sport}</div>
+    </div>`;
+  }
+  return `<div class="bet">
+    <div class="top"><span class="name">${b.event}</span><span class="pill">+${b.edge_pct.toFixed(1)}% value</span></div>
+    <div class="meta">👉 Apuéstale a: <b style="color:var(--acc)">${sel}</b> · cuota <b>${b.best_price.toFixed(2)}</b> en ${b.best_bookmaker}
+      · cuota justa ${b.fair_price.toFixed(2)} · apostar <b>${money0(b.stake_suggestion)}</b><br>
+      🕐 ${when} · ${b.sport} · ${b.num_books} casas</div>
+    <div class="actions" style="margin-top:8px">${reg}</div>
+  </div>`;
+}
+
+let VALUE_ONLY_CALIENTE = false;
+async function loadValue(){
+  const sport = $('#sport').value;
+  $('#bestBox').innerHTML=''; $('#result').innerHTML = '<div class="card"><span class="spin"></span> Analizando cuotas…</div>';
+  try{
+    const url = '/value-bets?sport='+encodeURIComponent(sport)+(VALUE_ONLY_CALIENTE?'&only_caliente=true':'');
+    const r = await fetch(withKey(url));
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const bets = await r.json();
+    const demo = isDemoData(bets, 'sport');
+    if(KEY_CONFIGURED && demo){ setMode('blocked'); } else if(demo){ setMode('demo'); }
+    const toggle = `<div class="card"><div class="controls"><label style="margin:0;display:flex;align-items:center;gap:8px;cursor:pointer">
+      <input type="checkbox" id="calChk" ${VALUE_ONLY_CALIENTE?'checked':''} style="width:auto"> Solo value que puedo apostar en <b>Caliente</b></label></div></div>`;
+    if(!bets.length){
+      $('#bestBox').innerHTML = toggle;
+      $('#result').innerHTML = `<div class="card"><div class="empty">🚫 ${VALUE_ONLY_CALIENTE?'No hay value en Caliente ahora mismo.':'Hoy no hay ninguna apuesta con value suficiente en esta liga.'}<br><b>La mejor jugada: no apostar.</b> Guardar la lana también es ganar.</div></div>`;
+    } else {
+      $('#bestBox').innerHTML = toggle + betCard(bets[0], true);
+      $('#result').innerHTML = `<div class="card"><h3>💎 Apuestas con value <span class="count">(${bets.length})</span></h3>${bets.map(b=>betCard(b,false)).join('')}</div>`;
+    }
+    const c = $('#calChk'); if(c) c.onchange = ()=>{ VALUE_ONLY_CALIENTE = c.checked; loadValue(); };
+  }catch(e){
+    $('#result').innerHTML = `<div class="card"><div class="err">No pude consultar la API. ¿Está corriendo el servidor?<br>Detalle: ${e.message}</div></div>`;
+  }
+}
+
+// ============ COMBINADAS ============
+let PARLAY_ALL = [], PARLAY_SEL = [];
 
 async function loadParlay(){
   const sport = $('#sport').value;
@@ -255,38 +350,64 @@ async function loadParlay(){
   }
 }
 
+async function autoParlay(){
+  const sport = $('#sport').value;
+  $('#bestBox').innerHTML = '<div class="card"><span class="spin"></span> Armando la mejor combinada…</div>';
+  try{
+    const r = await fetch(withKey('/parlay/suggest?sport='+encodeURIComponent(sport)+'&size=3'));
+    const d = await r.json();
+    if(!d.legs){ $('#bestBox').innerHTML = `<div class="card"><div class="empty">${d.mensaje||'No hay combinada sugerida hoy.'}</div></div>`; return; }
+    const legsList = d.legs.map(l=>`<div class="plleg">✔ <b>${l.selection}</b> <span class="mut">· ${l.event} · ${(l.probability*100).toFixed(0)}% · cuota ${l.odds.toFixed(2)}</span></div>`).join('');
+    const warns = (d.warnings||[]).map(w=>`<div class="vnote" style="color:var(--warn)">⚠️ ${w}</div>`).join('');
+    $('#bestBox').innerHTML = `<div class="card best">
+      <div class="tag">🪄 Combinada sugerida (una pata por partido)</div>
+      <div style="margin:8px 0">${legsList}</div>
+      <div class="kv">
+        <div><div class="l">Prob. que entre</div><div class="v ${d.combined_probability>=.3?'edge':(d.combined_probability>=.15?'warn':'bad')}">${(d.combined_probability*100).toFixed(1)}%</div></div>
+        <div><div class="l">Cuota combinada</div><div class="v">${d.combined_odds.toFixed(2)}</div></div>
+        <div><div class="l">Apostar</div><div class="v">${money0(d.stake_suggestion)}</div></div>
+        <div><div class="l">Pagaría</div><div class="v">${money0(d.payout)}</div></div>
+        <div><div class="l">Value</div><div class="v ${d.edge_pct>=0?'edge':'bad'}">${d.edge_pct>=0?'+':''}${d.edge_pct.toFixed(1)}%</div></div>
+      </div>
+      <div class="analysis">${d.verdict}</div>${warns}</div>`;
+  }catch(e){ $('#bestBox').innerHTML = `<div class="card"><div class="err">Error: ${e.message}</div></div>`; }
+}
+
 function renderParlayList(){
   const groups = {};
   PARLAY_ALL.forEach((l,i)=>{ (groups[l.event] ||= []).push(i); });
-  let html = `<div class="analysis" style="margin:6px 4px">🎰 Toca las patas que quieras combinar (mejor de <b>distintos partidos</b>). Abajo verás la matemática real de tu combinada.</div>`;
+  let html = `<div class="card"><div class="controls">
+    <button class="btn sm" id="autoP">🪄 Armar la mejor por mí</button>
+    <div class="analysis" style="margin:0;flex:1;min-width:200px">🎰 O toca las patas que quieras combinar (mejor de <b>distintos partidos</b>). Abajo ves la matemática real.</div></div></div>`;
   for(const [event, idxs] of Object.entries(groups)){
     html += `<div class="card"><div class="name" style="margin-bottom:8px">${event}</div>`;
     idxs.forEach(i=>{
       const l = PARLAY_ALL[i];
       const on = PARLAY_SEL.includes(i);
+      const cal = l.my_book_odds ? ` · Caliente ${l.my_book_odds.toFixed(2)}` : '';
       html += `<div class="legrow ${on?'on':''}" data-i="${i}">
         <span class="chk">${on?'✓':''}</span>
         <span class="legmark">${l.market}</span>
         <span class="legsel">${l.selection}</span>
-        <span class="legodds">${(l.probability*100).toFixed(0)}% · ${l.best_odds.toFixed(2)}</span>
+        <span class="legodds">${(l.probability*100).toFixed(0)}% · ${l.best_odds.toFixed(2)}${cal}</span>
       </div>`;
     });
     html += `</div>`;
   }
   $('#result').innerHTML = html;
+  $('#autoP').onclick = autoParlay;
   updateParlaySummary();
 }
 
 function updateParlaySummary(){
   if(PARLAY_SEL.length === 0){
-    $('#bestBox').innerHTML = `<div class="card"><div class="empty">🎰 Selecciona <b>2 o más patas</b> abajo para armar tu combinada y ver su probabilidad real.</div></div>`;
+    $('#bestBox').innerHTML = `<div class="card"><div class="empty">🎰 Selecciona <b>2 o más patas</b> abajo, o pulsa <b>🪄 Armar la mejor por mí</b>.</div></div>`;
     return;
   }
   const chosen = PARLAY_SEL.map(i=>PARLAY_ALL[i]);
   const prob = chosen.reduce((a,l)=>a*l.probability,1);
   const odds = chosen.reduce((a,l)=>a*l.best_odds,1);
-  const stake = 10;
-  const payout = stake*odds;
+  const stake = 10, payout = stake*odds;
   const edge = (prob*odds - 1)*100;
   const sameEvent = (new Set(chosen.map(l=>l.event)).size < chosen.length);
 
@@ -294,13 +415,10 @@ function updateParlaySummary(){
   const probCls = prob>=0.30 ? 'edge' : (prob>=0.15 ? 'warn' : 'bad');
 
   let verdict = `Tu combinada de <b>${chosen.length} patas</b> tiene <b>${(prob*100).toFixed(1)}%</b> de probabilidad de entrar completa. `;
-  if(chosen.length<2){ verdict = 'Agrega al menos otra pata para que sea combinada.'; }
-  else {
-    verdict += `Con $10 ganarías <b>${money(payout-stake)}</b> netos si aciertan todas. `;
-    if(prob < 0.15) verdict += `⚠️ Menos de 15%: es prácticamente un billete de lotería. `;
-    if(edge < 0) verdict += `El value es <b class="bad">${edge.toFixed(1)}%</b> — negativo, como casi toda combinada: entre más patas, más difícil. Diviértete, pero apuesta poco.`;
-    else verdict += `Curiosamente el value sale <b class="edge">+${edge.toFixed(1)}%</b> (raro en combinadas).`;
-  }
+  verdict += `Con $10 ganarías <b>${money0(payout-stake)}</b> netos si aciertan todas. `;
+  if(prob < 0.15) verdict += `⚠️ Menos de 15%: es prácticamente un billete de lotería. `;
+  if(edge < 0) verdict += `El value es <b class="bad">${edge.toFixed(1)}%</b> — negativo, como casi toda combinada: entre más patas, más difícil.`;
+  else verdict += `Curiosamente el value sale <b class="edge">+${edge.toFixed(1)}%</b> (raro en combinadas).`;
 
   $('#bestBox').innerHTML = `<div class="card best">
     <div class="tag">🎰 Tu combinada (${chosen.length} patas)</div>
@@ -308,40 +426,128 @@ function updateParlaySummary(){
     <div class="kv">
       <div><div class="l">Prob. que entre</div><div class="v ${probCls}">${(prob*100).toFixed(1)}%</div></div>
       <div><div class="l">Cuota combinada</div><div class="v">${odds.toFixed(2)}</div></div>
-      <div><div class="l">$10 pagarían</div><div class="v">${money(payout)}</div></div>
+      <div><div class="l">$10 pagarían</div><div class="v">${money0(payout)}</div></div>
       <div><div class="l">Value</div><div class="v ${edge>=0?'edge':'bad'}">${edge>=0?'+':''}${edge.toFixed(1)}%</div></div>
     </div>
     <div class="analysis">${verdict}</div>
     ${sameEvent?'<div class="vnote" style="color:var(--warn)">⚠️ Tienes patas del mismo partido: están correlacionadas, la probabilidad real puede variar de este cálculo.</div>':''}
+    <div class="actions" style="margin-top:12px">
+      <button class="btn sm" onclick='regParlay(${JSON.stringify(chosen.map(l=>l.selection).join(" + "))}, ${odds.toFixed(2)}, ${prob})'>➕ Registrar combinada</button>
+    </div>
   </div>`;
 }
 
-async function loadValue(){
-  const sport = $('#sport').value;
-  $('#bestBox').innerHTML=''; $('#result').innerHTML = '<div class="card"><span class="spin"></span> Analizando cuotas…</div>';
+// ============ REGISTRO / BANKROLL ============
+async function loadRegistro(){
+  $('#bestBox').innerHTML=''; $('#result').innerHTML = '<div class="card"><span class="spin"></span> Cargando tu historial…</div>';
   try{
-    const r = await fetch(withKey('/value-bets?sport='+encodeURIComponent(sport)));
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const bets = await r.json();
-    const demo = isDemoData(bets, 'sport');
-    if(KEY_CONFIGURED && demo){
-      setMode('blocked');
-      $('#bestBox').innerHTML = banner('⚠️ <b>Tu red está bloqueando las cuotas en vivo</b> (típico de redes de trabajo). '+
-        'Mostrando datos <b>DEMO</b> para que veas la plataforma funcionando.<br>🏠 Ábrela desde tu casa o el hotspot del celular y pasará a cuotas reales sola.');
-    } else if(demo){ setMode('demo'); }
+    const [sr, br] = await Promise.all([ fetch(withKey('/stats')), fetch(withKey('/bets')) ]);
+    const s = await sr.json(); const bets = await br.json();
+    REMAIN_TODAY = s.restante_hoy;
+
+    const netCls = s.neto>0?'edge':(s.neto<0?'bad':'');
+    const rachaTxt = s.racha>0?`🔥 ${s.racha} ganadas seguidas`:(s.racha<0?`❄️ ${Math.abs(s.racha)} perdidas seguidas`:'—');
+    let calib = '';
+    if(s.calibracion){
+      calib = `<div class="analysis" style="margin-top:12px">🎓 <b>Calibración del motor:</b> de ${s.calibracion.apuestas_evaluadas} apuestas esperaba ~${s.calibracion.aciertos_esperados} aciertos y hubo ${s.calibracion.aciertos_reales}. ${s.calibracion.veredicto}</div>`;
+    }
+
+    $('#bestBox').innerHTML = `<div class="card best">
+      <div class="tag">📒 Tu registro real</div>
+      <div class="ev" style="font-size:17px">Bankroll actual: ${money0(s.bankroll_actual)} <span class="mut" style="font-size:13px">(inició en ${money0(s.bankroll_inicial)})</span></div>
+      <div class="kv">
+        <div><div class="l">Neto</div><div class="v ${netCls}">${s.neto>=0?'+':''}${money0(s.neto)}</div></div>
+        <div><div class="l">ROI</div><div class="v ${netCls}">${s.roi_pct>=0?'+':''}${s.roi_pct}%</div></div>
+        <div><div class="l">Acierto</div><div class="v">${s.acierto_pct}%</div></div>
+        <div><div class="l">Ganadas / Perdidas</div><div class="v">${s.ganadas} / ${s.perdidas}</div></div>
+        <div><div class="l">Racha</div><div class="v" style="font-size:14px">${rachaTxt}</div></div>
+        <div><div class="l">En juego</div><div class="v">${money0(s.en_juego)}</div></div>
+      </div>
+      ${DAILY_CAP>0?`<div class="cnote" style="margin-top:12px">💰 Hoy te quedan <b>${money0(s.restante_hoy)}</b> de tu límite diario de ${money0(DAILY_CAP)}.</div>`:''}
+      ${calib}
+    </div>`;
+
     if(!bets.length){
-      $('#result').innerHTML = `<div class="card"><div class="empty">🚫 Hoy no hay ninguna apuesta con value suficiente en esta liga.<br><b>La mejor jugada: no apostar.</b> Guardar la lana también es ganar.</div></div>`;
+      $('#result').innerHTML = `<div class="card"><div class="empty">Aún no registras apuestas. Cuando apuestes en Caliente, pulsa <b>➕ Registrar</b> en cualquier predicción o value para llevar la cuenta real.</div></div>`;
       return;
     }
-    const best = betCard(bets[0], true);
-    $('#bestBox').innerHTML = ($('#bestBox').innerHTML || '') + best;
-    $('#result').innerHTML = `<div class="card"><h3>💎 Todas las apuestas con value <span class="count">(${bets.length})</span></h3>${
-      bets.map(b=>betCard(b,false)).join('')}</div>`;
+    const rows = bets.map(b=>{
+      const parlay = b.is_parlay ? '🎰 ' : '';
+      const acts = b.status==='pendiente'
+        ? `<button class="btn sm ok" onclick="settle(${b.id},'ganada')">✓ Ganó</button>
+           <button class="btn sm no" onclick="settle(${b.id},'perdida')">✗ Perdió</button>`
+        : (b.status==='ganada' ? `<span class="mut" style="font-size:12px">+${money0(b.payout-b.stake)}</span>` : '');
+      return `<div class="rowline">
+        <div style="min-width:0">
+          <div class="name" style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${parlay}${b.selection}</div>
+          <div class="mut" style="font-size:12px">${b.event} · $${Math.round(b.stake)} @ ${b.odds.toFixed(2)}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <span class="st ${b.status}">${b.status}</span>
+          <div class="actions" style="margin-top:6px;justify-content:flex-end">${acts}
+            <button class="btn sm sec" onclick="delBet(${b.id})">🗑</button></div>
+        </div>
+      </div>`;
+    }).join('');
+    $('#result').innerHTML = `<div class="card"><h3>🧾 Historial <span class="count">(${bets.length})</span></h3>${rows}</div>`;
   }catch(e){
-    $('#result').innerHTML = `<div class="card"><div class="err">No pude consultar la API. ¿Está corriendo el servidor? (<code>uvicorn src.api:app --reload</code>)<br>Detalle: ${e.message}</div></div>`;
+    $('#result').innerHTML = `<div class="card"><div class="err">No pude cargar el registro. Detalle: ${e.message}</div></div>`;
   }
 }
 
+async function settle(id, status){
+  await fetch(withKey(`/bets/${id}/settle`), {method:'POST', headers:{'Content-Type':'application/json',...jkey()}, body:JSON.stringify({status})});
+  loadRegistro();
+}
+async function delBet(id){
+  if(!confirm('¿Borrar esta apuesta del registro?')) return;
+  await fetch(withKey(`/bets/${id}`), {method:'DELETE', headers:jkey()});
+  loadRegistro();
+}
+
+// ============ MODAL REGISTRAR ============
+let REG_CTX = {};
+function openReg(event, sel, odds, prob, market){
+  REG_CTX = {event, sel, prob, market, is_parlay:false};
+  $('#m_event').value = event;
+  $('#m_sel').value = sel;
+  $('#m_odds').value = odds ? Number(odds).toFixed(2) : '';
+  $('#m_stake').value = Math.max(10, Math.round((REMAIN_TODAY!=null?Math.min(REMAIN_TODAY,15):15)));
+  checkStake();
+  $('#ov').classList.add('on');
+}
+function regParlay(sel, odds, prob){
+  REG_CTX = {event:'Combinada', sel, prob, market:'Combinada', is_parlay:true};
+  $('#m_event').value = 'Combinada';
+  $('#m_sel').value = sel;
+  $('#m_odds').value = Number(odds).toFixed(2);
+  $('#m_stake').value = 10;
+  checkStake();
+  $('#ov').classList.add('on');
+}
+function checkStake(){
+  const stake = parseFloat($('#m_stake').value)||0;
+  let w = '';
+  if(REMAIN_TODAY!=null && stake > REMAIN_TODAY) w = `⚠️ Te pasarías del límite diario (te quedan ${money0(REMAIN_TODAY)}).`;
+  else if(stake > BANKROLL*0.15) w = `⚠️ Es más del 15% de tu bankroll. Considera bajarlo.`;
+  $('#m_warn').innerHTML = w ? `<div class="warnbox">${w}</div>` : '';
+}
+$('#m_stake').oninput = checkStake;
+$('#m_cancel').onclick = ()=> $('#ov').classList.remove('on');
+$('#ov').onclick = e=>{ if(e.target.id==='ov') $('#ov').classList.remove('on'); };
+$('#m_save').onclick = async ()=>{
+  const odds = parseFloat($('#m_odds').value), stake = parseFloat($('#m_stake').value);
+  if(!(odds>1) || !(stake>0)){ alert('Revisa la cuota (>1) y el monto (>0).'); return; }
+  const body = {event:REG_CTX.event, selection:REG_CTX.sel, odds, stake,
+    market:REG_CTX.market, probability:REG_CTX.prob, is_parlay:REG_CTX.is_parlay};
+  const r = await fetch(withKey('/bets'), {method:'POST', headers:{'Content-Type':'application/json',...jkey()}, body:JSON.stringify(body)});
+  if(!r.ok){ const d=await r.json().catch(()=>({})); alert(d.detail||'No se pudo registrar.'); return; }
+  const d = await r.json(); REMAIN_TODAY = d.restante_hoy;
+  $('#ov').classList.remove('on');
+  loadRegistro();
+};
+
+// ============ PARTIDOS ============
 async function loadEvents(){
   const sport = $('#sport').value;
   $('#bestBox').innerHTML=''; $('#result').innerHTML = '<div class="card"><span class="spin"></span> Cargando partidos…</div>';
@@ -363,9 +569,9 @@ async function loadEvents(){
 $('#goPredict').onclick = loadPredict;
 $('#goValue').onclick = loadValue;
 $('#goParlay').onclick = loadParlay;
+$('#goRegistro').onclick = loadRegistro;
 $('#goEvents').onclick = loadEvents;
 
-// Clic en una pata de la combinada (delegado, porque la lista se re-dibuja).
 $('#result').addEventListener('click', e=>{
   const row = e.target.closest('.legrow');
   if(!row) return;
@@ -377,7 +583,7 @@ $('#result').addEventListener('click', e=>{
   updateParlaySummary();
 });
 
-loadInfo(); loadPredict();
+(async()=>{ await loadInfo(); loadPredict(); })();
 </script>
 </body>
 </html>

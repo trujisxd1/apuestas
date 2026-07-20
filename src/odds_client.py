@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 import httpx
 
+from .cache import TTLCache
 from .config import settings
 from .models import Event, BookmakerMarket, Outcome
 
@@ -32,6 +33,8 @@ class OddsClient:
         # Estado del último intento de red (para avisar al front si la red bloquea la API).
         self.last_error: str | None = None
         self.fell_back: bool = False
+        # Caché para no quemar la cuota de la API (las cuotas no cambian cada segundo).
+        self.cache = TTLCache(ttl_seconds=settings.cache_ttl)
 
     # ---------- API real ----------
     def _parse_event(self, raw: dict) -> Event:
@@ -61,13 +64,25 @@ class OddsClient:
         )
 
     def fetch_events(self, sport_key: str, markets: str = "h2h") -> list[Event]:
-        """Trae eventos con cuotas reales. Sin key -> demo. Si la red bloquea la API,
-        cae a demo (etiquetado) en vez de tronar."""
+        """Trae eventos con cuotas reales (con caché). Sin key -> demo. Si la red bloquea
+        la API, cae a demo (etiquetado) en vez de tronar."""
         self.last_error = None
         self.fell_back = False
         if settings.demo_mode:
             return demo_events(sport_key)
 
+        cache_key = f"{sport_key}:{markets}"
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            return cached
+
+        events = self._fetch_live(sport_key, markets)
+        # Solo cacheamos respuestas reales (no el fallback demo por red bloqueada).
+        if events and not self.fell_back:
+            self.cache.set(cache_key, events)
+        return events
+
+    def _fetch_live(self, sport_key: str, markets: str) -> list[Event]:
         url = f"{self.base}/sports/{sport_key}/odds"
 
         def _call(mkts: str):
@@ -152,7 +167,7 @@ def demo_events(sport_key: str = "soccer_mexico_ligamx") -> list[Event]:
             outcomes=[Outcome(name="Yes", price=yes), Outcome(name="No", price=no)],
         )
 
-    # Partido 1: mercado parejo, SIN value real (todas las casas coinciden).
+    # Partido 1: mercado parejo, casas coinciden (alto acuerdo, dato confiable).
     ev1 = Event(
         id="demo-juarez-puebla",
         sport_key=sport_key,
@@ -161,9 +176,10 @@ def demo_events(sport_key: str = "soccer_mexico_ligamx") -> list[Event]:
         home_team="FC Juárez",
         away_team="Puebla",
         markets=[
-            mk("Bet365", 1.90, 3.40, 4.20, "FC Juárez", "Puebla"),
             mk("Pinnacle", 1.92, 3.35, 4.10, "FC Juárez", "Puebla"),
+            mk("Bet365", 1.90, 3.40, 4.20, "FC Juárez", "Puebla"),
             mk("DraftKings", 1.88, 3.45, 4.25, "FC Juárez", "Puebla"),
+            mk("William Hill", 1.91, 3.38, 4.15, "FC Juárez", "Puebla"),
             mk("Caliente", 1.89, 3.30, 4.15, "FC Juárez", "Puebla"),
             totals("Bet365", 2.05, 1.75), totals("Pinnacle", 2.08, 1.73),
             totals("Caliente", 2.00, 1.80),
@@ -171,7 +187,7 @@ def demo_events(sport_key: str = "soccer_mexico_ligamx") -> list[Event]:
         ],
     )
 
-    # Partido 2: una casa ("Caliente") paga DE MÁS al empate -> VALUE detectable.
+    # Partido 2: Caliente paga DE MÁS al empate -> VALUE detectable EN TU CASA.
     ev2 = Event(
         id="demo-leon-atlas",
         sport_key=sport_key,
@@ -180,14 +196,51 @@ def demo_events(sport_key: str = "soccer_mexico_ligamx") -> list[Event]:
         home_team="León",
         away_team="Atlas",
         markets=[
-            mk("Bet365", 1.85, 3.50, 4.60, "León", "Atlas"),
             mk("Pinnacle", 1.83, 3.55, 4.70, "León", "Atlas"),
+            mk("Bet365", 1.85, 3.50, 4.60, "León", "Atlas"),
             mk("DraftKings", 1.86, 3.60, 4.50, "León", "Atlas"),
-            mk("Caliente", 1.80, 4.30, 4.40, "León", "Atlas"),  # empate inflado
+            mk("William Hill", 1.84, 3.52, 4.65, "León", "Atlas"),
+            mk("Caliente", 1.95, 3.55, 4.40, "León", "Atlas"),  # local inflado -> value en Caliente
             totals("Bet365", 1.90, 1.90), totals("Pinnacle", 1.88, 1.92),
             totals("Caliente", 1.85, 1.95),
             btts("Bet365", 1.80, 2.00), btts("Caliente", 1.75, 2.05),
         ],
     )
 
-    return [ev1, ev2]
+    # Partido 3: favorito FUERTE y claro (alta confianza, buena pata para combinada).
+    ev3 = Event(
+        id="demo-america-queretaro",
+        sport_key=sport_key,
+        sport_title="Liga MX (DEMO)",
+        commence_time=_soon(9),
+        home_team="América",
+        away_team="Querétaro",
+        markets=[
+            mk("Pinnacle", 1.42, 4.60, 7.50, "América", "Querétaro"),
+            mk("Bet365", 1.40, 4.75, 8.00, "América", "Querétaro"),
+            mk("DraftKings", 1.43, 4.50, 7.20, "América", "Querétaro"),
+            mk("William Hill", 1.41, 4.70, 7.80, "América", "Querétaro"),
+            mk("Caliente", 1.44, 4.40, 7.00, "América", "Querétaro"),
+            totals("Bet365", 1.75, 2.05), totals("Pinnacle", 1.73, 2.08),
+            totals("Caliente", 1.70, 2.10),
+            btts("Bet365", 2.00, 1.80), btts("Caliente", 2.05, 1.75),
+        ],
+    )
+
+    # Partido 4: casas MUY discordantes (bajo acuerdo -> dato poco confiable, se avisa).
+    ev4 = Event(
+        id="demo-tigres-chivas",
+        sport_key=sport_key,
+        sport_title="Liga MX (DEMO)",
+        commence_time=_soon(11),
+        home_team="Tigres",
+        away_team="Chivas",
+        markets=[
+            mk("Pinnacle", 2.10, 3.30, 3.40, "Tigres", "Chivas"),
+            mk("Bet365", 1.75, 3.60, 4.50, "Tigres", "Chivas"),  # muy distinto de Pinnacle
+            mk("DraftKings", 2.40, 3.10, 3.00, "Tigres", "Chivas"),
+            mk("Caliente", 1.95, 3.40, 3.90, "Tigres", "Chivas"),
+        ],
+    )
+
+    return [ev3, ev1, ev2, ev4]
